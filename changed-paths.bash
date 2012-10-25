@@ -4,6 +4,7 @@ set -o errexit
 
 ##
 # changed-paths.bash - Brent Atkinson - March 16, 2012
+# Edited by Mark Gerard (with help from Remi Andre) to handle BSD regex implementation on unix systems - October 24, 2012
 # 
 # A script to show what has been changed during an iteration. It is meant to
 # help the release manager determine what needs to be released at iteration
@@ -11,7 +12,7 @@ set -o errexit
 ##
 
 SVNROOT="https://svn.openxdata.org/"
-ITERSTART=`date --date='15 days ago' +"%F"`
+ITERSTART=`date -v-15d +"%F"`
 PROJECTS="Server Forms J2ME protocol-api protocol-providers/mforms-proto protocol-providers/odk-protocol/odk-proto protocol-providers/odk-protocol/odk-resolver"
 
 
@@ -27,9 +28,9 @@ do
   echo "Paths changed for $project:"
   echo "-----------------------------------"
   xsltproc svnlog.xsl $LOGFILE \
-    | grep "^\/\($project\)" \
-    | sed -n 's/^.*\(trunk\).*/\1/p;s/^.*\(\(tags\|branches\)\/[^/]\+\).*/\1/p' \
-    | uniq --count
+    | grep "^/$project" \
+    | sed -En "s/^.*(trunk).*/\1/p;s/^.*((tags|branches)\/[^/]+).*/\1/p" \
+    | uniq -c
   echo
 done
 
